@@ -2,10 +2,10 @@ import java.awt.*;
 
 public class Wierzcholek {
 
-    protected int x;
-    protected int y;
+    private int x;
+    private int y;
 
-    protected int r;
+    private int r;
 
     private Color kolor;
     private String etykieta;

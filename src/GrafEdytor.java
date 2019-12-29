@@ -46,7 +46,6 @@ public class GrafEdytor extends JFrame implements ActionListener {
 
     private GrafPanel panel = new GrafPanel();
 
-
     public GrafEdytor() {
         super(TYTUL);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -74,18 +73,21 @@ public class GrafEdytor extends JFrame implements ActionListener {
         Graf graf = new Graf();
 
         Wierzcholek n1 = new Wierzcholek(100, 100);
-        Wierzcholek n2 = new Wierzcholek(100, 200);
-        n2.setKolor(Color.CYAN);
+        Wierzcholek n2 = new Wierzcholek(100, 200, Color.CYAN, "O");
         Wierzcholek n3 = new Wierzcholek(200, 100);
         n3.setR(20);
-        Wierzcholek n4 = new Wierzcholek(200, 250);
-        n4.setKolor(Color.GREEN);
+        Wierzcholek n4 = new Wierzcholek(200, 250, Color.GREEN, "A");
         n4.setR(30);
+        Krawedz k1 = new Krawedz(n1, n3, 12, Color.PINK);
+        Krawedz k2 = new Krawedz(n1, n4, 9, Color.cyan);
+
 
         graf.dodajWierzcholek(n1);
         graf.dodajWierzcholek(n2);
         graf.dodajWierzcholek(n3);
         graf.dodajWierzcholek(n4);
+        graf.dodajKrawedz(k1);
+        graf.dodajKrawedz(k2);
         panel.setGraf(graf);
     }
 

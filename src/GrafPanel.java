@@ -8,6 +8,7 @@ public class GrafPanel extends JPanel implements MouseListener, MouseMotionListe
 
     Graf graf;
     private RysownikKrawedzi rysownik=new RysownikKrawedzi();
+    private ZnajdywaczDrogi znajdywacz=new ZnajdywaczDrogi();
 
     private int mouseX = 0;
     private int mouseY = 0;
@@ -151,6 +152,12 @@ public class GrafPanel extends JPanel implements MouseListener, MouseMotionListe
                 rysownik.rysujKrawedz();
                 repaint();
                 rysownik.przestawWlacznik();
+            }
+            if (znajdywacz.getWlacznik() && wierzcholekPodKursorem!=null)
+            {
+                znajdywacz.znajdzNajkrotszaDroge();
+
+                znajdywacz.przestawWlacznik();
             }
         }
         if (event.getButton() == 3)
@@ -350,6 +357,14 @@ public class GrafPanel extends JPanel implements MouseListener, MouseMotionListe
         });
         popup.add(menuItem);
 
+        menuItem = new JMenuItem("Znajdz najkrótszą drogę do...");
+        menuItem.addActionListener((a) -> {
+            JOptionPane.showMessageDialog(this, "Wybierz wieszchołek do którego ma być policzona droga.");
+            znajdywacz = new ZnajdywaczDrogi(wierzcholek, this);
+            znajdywacz.przestawWlacznik();
+        });
+        popup.add(menuItem);
+
         popup.show(event.getComponent(), event.getX(), event.getY());
     }
 
@@ -449,5 +464,43 @@ class RysownikKrawedzi {
             if ((w1==krawedz.getPoczatek() && w2==krawedz.getKoniec()) || (w2==krawedz.getPoczatek() && w1==krawedz.getKoniec())) return true;
         }
         return false;
+    }
+
+}
+
+
+class ZnajdywaczDrogi {
+
+    private Wierzcholek start;
+
+    private DijkstraZnajdywaczDrogi dijkstra;
+    private GrafPanel panel;
+
+    private boolean wlacznik;
+
+    protected void przestawWlacznik(){
+        if (wlacznik) wlacznik=false;
+        else wlacznik=true;
+    }
+
+    protected boolean getWlacznik(){
+        return this.wlacznik;
+    }
+
+    public ZnajdywaczDrogi (Wierzcholek start, GrafPanel panel){
+        this.start = start;
+        this.panel = panel;
+        this.wlacznik = false;
+    }
+
+    public ZnajdywaczDrogi (){this.wlacznik=false;}
+
+    public void znajdzNajkrotszaDroge()
+    {
+        Wierzcholek koniec = panel.wierzcholekPodKursorem;
+        if (start != koniec) {
+            dijkstra = new DijkstraZnajdywaczDrogi(panel.graf.getListaSasiedztwa(), panel.graf.getWierzcholki());
+
+        }
     }
 }

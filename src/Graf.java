@@ -1,7 +1,9 @@
 import java.awt.*;
 import java.io.Serializable;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Graf implements Serializable {
     private static final long serialVersionUID = -8989249014859614147L;
@@ -55,5 +57,38 @@ public class Graf implements Serializable {
         {
             wierzcholek.draw(g);
         }
+    }
+
+    public List<Map.Entry<Integer, Integer>>[] getListaSasiedztwa(){
+        List<Map.Entry<Integer,Integer>> [] lista = new List[krawedzie.size()];
+        int i = 0,j = 0;
+        for (Krawedz krawedz : krawedzie)
+        {
+            int ip = wierzcholki.indexOf(krawedz.getPoczatek());
+            int ik = wierzcholki.indexOf(krawedz.getKoniec());
+            lista[ip].add(new AbstractMap.SimpleEntry<>(ik, krawedz.getDlugosc()));
+            lista[ik].add(new AbstractMap.SimpleEntry<>(ip, krawedz.getDlugosc()));
+        }
+        /*for (Wierzcholek wierzcholek : wierzcholki)
+        {
+            j=0;
+            for (Krawedz krawedz : krawedzie)
+            {
+                if (krawedz.getKoniec() == wierzcholek)
+                {
+                    lista [i][j] = wierzcholki.indexOf(krawedz.getPoczatek());
+                    System.out.println(i + " " + j + " " + krawedz.getKoniec() + " " + krawedz.getPoczatek());
+                    j++;
+                }
+                if (krawedz.getPoczatek() == wierzcholek)
+                {
+                    lista [i][j] = wierzcholki.indexOf(krawedz.getKoniec());
+                    System.out.println(i + " " + j + " " + krawedz.getPoczatek() + " " + krawedz.getKoniec());
+                    j++;
+                }
+            }
+            i++;
+        }*/
+        return lista;
     }
 }

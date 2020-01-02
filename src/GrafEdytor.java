@@ -40,7 +40,8 @@ public class GrafEdytor extends JFrame implements ActionListener {
     private JMenuItem menuNowy = new JMenuItem("Nowy", KeyEvent.VK_N);
     private JMenuItem menuPokażPrzykład = new JMenuItem("Przykład", KeyEvent.VK_P);
     private JMenuItem menuWyjdź = new JMenuItem("Wyjdź", KeyEvent.VK_W);
-    private JMenuItem menuListaWierzchołków = new JMenuItem("Lista wierzchołków", KeyEvent.VK_L);
+    private JMenuItem menuListaWierzchołków = new JMenuItem("Lista wierzchołków", KeyEvent.VK_V);
+    private JMenuItem menuListaKrawedzi = new JMenuItem("Lista krawędzi", KeyEvent.VK_K);
     private JMenuItem menuAutor = new JMenuItem("Autor", KeyEvent.VK_A);
     private JMenuItem menuInstrukcja = new JMenuItem("Instrukcja", KeyEvent.VK_I);
 
@@ -55,18 +56,38 @@ public class GrafEdytor extends JFrame implements ActionListener {
         createMenu();
         showBuildingExample();
         setVisible(true);
+        /*panel.getGraf().getListaSasiedztwa();
+        Wierzcholek [] t = panel.graf.getWierzcholki();
+        int i = 0;
+        for (Wierzcholek w : t)
+        {
+            System.out.println(i + " " + t[i]);
+            i++;
+        }*/
     }
 
     private void pokazListeWierzcholkow(Graf graf) {
-        Wierzcholek array[] = graf.getWierzcholki();
+        Wierzcholek t[] = graf.getWierzcholki();
         int i = 0;
-        StringBuilder message = new StringBuilder("Liczba węzłów: " + array.length + "\n");
-        for (Wierzcholek node : array) {
-            message.append(node + "    ");
+        StringBuilder message = new StringBuilder("Liczba węzłów: " + t.length + "\n");
+        for (Wierzcholek wierzcholek : t) {
+            message.append(wierzcholek + "      ");
             if (++i % 5 == 0)
                 message.append("\n");
         }
         JOptionPane.showMessageDialog(this, message, TYTUL + " - Lista węzłów", JOptionPane.PLAIN_MESSAGE);
+    }
+    
+    private void pokazListeKrawedzi(Graf graf) {
+        Krawedz t[] = graf.getKrawedzie();
+        int i=0;
+        StringBuilder message = new StringBuilder("Liczba krawędzi: " + t.length + "\n");
+        for (Krawedz krawedz : t) {
+            message.append(krawedz + "      ");
+            if (++i % 5 == 0)
+                message.append("\n");
+        }
+        JOptionPane.showMessageDialog(this, message, TYTUL + " - Lista krawędzi", JOptionPane.PLAIN_MESSAGE);
     }
 
     private void showBuildingExample() {
@@ -104,6 +125,7 @@ public class GrafEdytor extends JFrame implements ActionListener {
         menuGraf.add(menuPokażPrzykład);
         menuGraf.addSeparator();
         menuGraf.add(menuListaWierzchołków);
+        menuGraf.add(menuListaKrawedzi);
         menuGraf.addSeparator();
         menuGraf.add(menuWyjdź);
 
@@ -128,6 +150,9 @@ public class GrafEdytor extends JFrame implements ActionListener {
         }
         if (source == menuListaWierzchołków) {
             pokazListeWierzcholkow(panel.getGraf());
+        }
+        if (source == menuListaKrawedzi) {
+            pokazListeKrawedzi(panel.getGraf());
         }
         if (source == menuAutor) {
             JOptionPane.showMessageDialog(this, AUTOR, TYTUL, JOptionPane.INFORMATION_MESSAGE);

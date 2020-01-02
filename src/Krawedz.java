@@ -76,4 +76,9 @@ public class Krawedz {
         g.setColor(kolor.darker());
         if (dlugosc>0) g.drawString(String.valueOf(dlugosc), this.getSrodekX(), this.getSrodekY());
     }
+
+    @Override
+    public String toString(){
+        return ("([" + poczatek.getX() +", " + poczatek.getY() + "], [" + koniec.getX() + ", " + koniec.getY() + "])");
+    }
 }

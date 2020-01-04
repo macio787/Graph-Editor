@@ -3,6 +3,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public class GrafEdytor extends JFrame implements ActionListener {
 
@@ -23,10 +25,17 @@ public class GrafEdytor extends JFrame implements ActionListener {
                     "Operacje myszka:\n" +
                     "   przeciąganie ==> przesuwanie wszystkich kół\n" +
                     "   PPM ==> tworzenie nowego koła w niejscu kursora\n" +
-                    "ponadto gdy kursor wskazuje koło:\n" +
+                    "gdy kursor wskazuje koło:\n" +
                     "   przeciąganie ==> przesuwanie koła\n" +
-                    "   PPM ==> zmiana koloru koła\n" +
-                    "                   lub usuwanie koła\n";
+                    "   PPM ==> zmiana koloru koła, zmiana etykiety koła,\n" +
+                    "   łączenie koła z innymi,  \n" +
+                    "   szukanie najkrótszej drogi którą można przejść \n" +
+                    "   do wierzchołka docelowego\n" +
+                    "   lub usuwanie koła\n" +
+                    "   kółko myszy ==> powiekszanie koła\n" +
+                    "gdy kursor wskazuje krawędź:\n" +
+                    "   PPM ==> zmiana koloru lub długości i usuwanie\n" +
+                    "   krawędzi";
 
 
     public static void main(String[] args) {
@@ -44,6 +53,8 @@ public class GrafEdytor extends JFrame implements ActionListener {
     private JMenuItem menuListaKrawedzi = new JMenuItem("Lista krawędzi", KeyEvent.VK_K);
     private JMenuItem menuAutor = new JMenuItem("Autor", KeyEvent.VK_A);
     private JMenuItem menuInstrukcja = new JMenuItem("Instrukcja", KeyEvent.VK_I);
+    private JMenuItem menuZapisz = new JMenuItem("Zapisz do pliku", KeyEvent.VK_Z);
+    private JMenuItem menuWczytaj = new JMenuItem("Wczytaj z pliku", KeyEvent.VK_C);
 
     private GrafPanel panel = new GrafPanel();
 
@@ -56,14 +67,6 @@ public class GrafEdytor extends JFrame implements ActionListener {
         createMenu();
         showBuildingExample();
         setVisible(true);
-        /*panel.getGraf().getListaSasiedztwa();
-        Wierzcholek [] t = panel.graf.getWierzcholki();
-        int i = 0;
-        for (Wierzcholek w : t)
-        {
-            System.out.println(i + " " + t[i]);
-            i++;
-        }*/
     }
 
     private void pokazListeWierzcholkow(Graf graf) {
@@ -88,6 +91,14 @@ public class GrafEdytor extends JFrame implements ActionListener {
                 message.append("\n");
         }
         JOptionPane.showMessageDialog(this, message, TYTUL + " - Lista krawędzi", JOptionPane.PLAIN_MESSAGE);
+    }
+
+    private void zapiszGraf(Graf graf)throws FileNotFoundException{
+        String fileName = JOptionPane.showInputDialog(panel, "Podaj nazwę pliku");
+        System.out.println(fileName);
+        if (fileName == null) return;
+        Graf.printToFile(fileName, graf);
+
     }
 
     private void showBuildingExample() {
@@ -117,6 +128,9 @@ public class GrafEdytor extends JFrame implements ActionListener {
         menuPokażPrzykład.addActionListener(this);
         menuWyjdź.addActionListener(this);
         menuListaWierzchołków.addActionListener(this);
+        menuListaKrawedzi.addActionListener(this);
+        menuZapisz.addActionListener(this);
+        menuWczytaj.addActionListener(this);
         menuAutor.addActionListener(this);
         menuInstrukcja.addActionListener(this);
 
@@ -126,6 +140,9 @@ public class GrafEdytor extends JFrame implements ActionListener {
         menuGraf.addSeparator();
         menuGraf.add(menuListaWierzchołków);
         menuGraf.add(menuListaKrawedzi);
+        menuGraf.addSeparator();
+        menuGraf.add(menuZapisz);
+        menuGraf.add(menuWczytaj);
         menuGraf.addSeparator();
         menuGraf.add(menuWyjdź);
 
@@ -144,6 +161,7 @@ public class GrafEdytor extends JFrame implements ActionListener {
         Object source = event.getSource();
         if (source == menuNowy) {
             panel.setGraf(new Graf());
+            panel.repaint();
         }
         if (source == menuPokażPrzykład) {
             showBuildingExample();
@@ -153,6 +171,24 @@ public class GrafEdytor extends JFrame implements ActionListener {
         }
         if (source == menuListaKrawedzi) {
             pokazListeKrawedzi(panel.getGraf());
+        }
+        if (source == menuZapisz) {
+            try {
+                zapiszGraf(panel.graf);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+        if (source == menuWczytaj) {
+            String fileName = JOptionPane.showInputDialog(panel, "Podaj nazwę pliku");
+            if (fileName == null) return;
+            try {
+                panel.setGraf(Graf.readFromFile(fileName));
+                panel.repaint();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
         }
         if (source == menuAutor) {
             JOptionPane.showMessageDialog(this, AUTOR, TYTUL, JOptionPane.INFORMATION_MESSAGE);

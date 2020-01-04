@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 
 public class GrafPanel extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener {
 
@@ -135,10 +136,18 @@ public class GrafPanel extends JPanel implements MouseListener, MouseMotionListe
     public void mousePressed(MouseEvent event) {
         if (event.getButton()==1) mouseButtonLeft = true;
         if (event.getButton()==3) mouseButtonRigth = true;
+        if (znajdywacz.isSciezkaPodswietlona()) {
+            znajdywacz.wygasSciezke();
+            repaint();
+        }
         setMouseCursor(event);
-        if (wierzcholekPodKursorem!=null) {
+        if (wierzcholekPodKursorem!=null && !znajdywacz.getWlacznik()) {
             graf.przesunWierzcholekNaWierzch(wierzcholekPodKursorem);
             repaint();
+        }
+        if (krawedzPodKursorem!=null) {
+            graf.przesunWierzcholekNaWierzch(krawedzPodKursorem.getPoczatek());
+            graf.przesunWierzcholekNaWierzch(krawedzPodKursorem.getKoniec());
         }
     }
 
@@ -155,9 +164,15 @@ public class GrafPanel extends JPanel implements MouseListener, MouseMotionListe
             }
             if (znajdywacz.getWlacznik() && wierzcholekPodKursorem!=null)
             {
-                znajdywacz.znajdzNajkrotszaDroge();
-
-                znajdywacz.przestawWlacznik();
+                int droga = znajdywacz.znajdzNajkrotszaDroge();
+                if (droga !=-1) {
+                    JOptionPane.showMessageDialog(this, "Najkrótsza droga dla zadanych wierzchołków jest długości " + droga);
+                    znajdywacz.podswietlSciezke();
+                    repaint();
+                    znajdywacz.przestawWlacznik();
+                }
+                else
+                    JOptionPane.showMessageDialog(this, "Taka droga nie istnieje", "Błąd", JOptionPane.ERROR_MESSAGE);
             }
         }
         if (event.getButton() == 3)
@@ -451,32 +466,34 @@ class RysownikKrawedzi {
 
     protected void rysujKrawedz (){
         Wierzcholek wierzcholek = panel.wierzcholekPodKursorem;
-        if (!isDuplikat(poczatek,wierzcholek))
+        if (panel.graf.znajdzKrawedz(poczatek, panel.wierzcholekPodKursorem)==null)
             panel.graf.dodajKrawedz(new Krawedz(poczatek, wierzcholek, dlugosc, kolor));
         else JOptionPane.showMessageDialog(panel, "Krawedź łącząca te dwa wierzchołki już istnieje", "Błąd", JOptionPane.ERROR_MESSAGE);
     }
-
-    private boolean isDuplikat(Wierzcholek w1, Wierzcholek w2)
-    {
-        Krawedz [] t = panel.graf.getKrawedzie();
-        for (Krawedz krawedz : t)
-        {
-            if ((w1==krawedz.getPoczatek() && w2==krawedz.getKoniec()) || (w2==krawedz.getPoczatek() && w1==krawedz.getKoniec())) return true;
-        }
-        return false;
-    }
-
 }
 
 
 class ZnajdywaczDrogi {
 
     private Wierzcholek start;
+    private Wierzcholek koniec;
 
     private DijkstraZnajdywaczDrogi dijkstra;
     private GrafPanel panel;
 
     private boolean wlacznik;
+    private boolean sciezkaPodswietlona;
+
+    private ArrayList<Color> oryginalneKoloryKrawedzi;
+
+    public ZnajdywaczDrogi (Wierzcholek start, GrafPanel panel){
+        this.start = start;
+        this.panel = panel;
+        this.wlacznik = false;
+        this.oryginalneKoloryKrawedzi = new ArrayList<Color>();
+    }
+
+    public ZnajdywaczDrogi (){this.wlacznik=false;}
 
     protected void przestawWlacznik(){
         if (wlacznik) wlacznik=false;
@@ -487,20 +504,55 @@ class ZnajdywaczDrogi {
         return this.wlacznik;
     }
 
-    public ZnajdywaczDrogi (Wierzcholek start, GrafPanel panel){
-        this.start = start;
-        this.panel = panel;
-        this.wlacznik = false;
+    protected boolean isSciezkaPodswietlona(){return this.sciezkaPodswietlona;}
+
+    protected int znajdzNajkrotszaDroge()
+    {
+        koniec = panel.wierzcholekPodKursorem;
+        if (start != koniec)
+        {
+            dijkstra = new DijkstraZnajdywaczDrogi(panel.graf.getListaSasiedztwa(), panel.graf.getWierzcholki());
+            return dijkstra.znajdzDroge(start, panel.wierzcholekPodKursorem);
+        }
+        else
+            return -1;
     }
 
-    public ZnajdywaczDrogi (){this.wlacznik=false;}
-
-    public void znajdzNajkrotszaDroge()
-    {
-        Wierzcholek koniec = panel.wierzcholekPodKursorem;
-        if (start != koniec) {
-            dijkstra = new DijkstraZnajdywaczDrogi(panel.graf.getListaSasiedztwa(), panel.graf.getWierzcholki());
-
+    protected void podswietlSciezke(){
+        Integer [] sciezka = dijkstra.getPoprzednik();
+        Wierzcholek[] listaWierzcholkow = panel.graf.getWierzcholki();
+        int i=0;
+        while (listaWierzcholkow[i]!=koniec)
+            i++;
+        while (sciezka[i]!=-1)
+        {
+            listaWierzcholkow[i].setKolorObwodki(Color.GREEN);
+            Krawedz krawedz = panel.graf.znajdzKrawedz(listaWierzcholkow[i],listaWierzcholkow[sciezka[i]]);
+            oryginalneKoloryKrawedzi.add(krawedz.getKolor());
+            krawedz.setKolor(Color.GREEN);
+            i=sciezka[i];
         }
+        listaWierzcholkow[i].setKolorObwodki(Color.GREEN);
+        sciezkaPodswietlona=true;
+    }
+
+    protected void wygasSciezke(){
+        Integer [] sciezka = dijkstra.getPoprzednik();
+        Wierzcholek[] listaWierzcholkow = panel.graf.getWierzcholki();
+        int i=0;
+        while (listaWierzcholkow[i]!=koniec)
+            i++;
+        int j=0;
+        while (sciezka[i]!=-1)
+        {
+            listaWierzcholkow[i].setKolorObwodki(Color.BLACK);
+            Krawedz krawedz = panel.graf.znajdzKrawedz(listaWierzcholkow[i],listaWierzcholkow[sciezka[i]]);
+            krawedz.setKolor(oryginalneKoloryKrawedzi.get(j));
+            j++;
+            i=sciezka[i];
+        }
+        listaWierzcholkow[i].setKolorObwodki(Color.BLACK);
+        oryginalneKoloryKrawedzi.clear();
+        sciezkaPodswietlona=false;
     }
 }

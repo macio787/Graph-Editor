@@ -1,4 +1,5 @@
 import java.awt.*;
+import java.io.*;
 
 public class Krawedz {
 
@@ -81,4 +82,55 @@ public class Krawedz {
     public String toString(){
         return ("([" + poczatek.getX() +", " + poczatek.getY() + "], [" + koniec.getX() + ", " + koniec.getY() + "])");
     }
+
+    public static void printToFile(PrintWriter writer, Krawedz k) {
+        writer.println(k.getPoczatek().getX() + "#" + k.getPoczatek().getY() + "#" +
+                k.getKoniec().getX() + "#" + k.getKoniec().getY() + "#" +
+                k.dlugosc + "#" + k.kolor.getRGB());
+    }
+
+    public static void printToFile(String fileName, Krawedz k) throws FileNotFoundException {
+        try (PrintWriter writer = new PrintWriter(fileName + ".krawedz")){
+            printToFile(writer, k);
+        }catch (FileNotFoundException e)
+        {
+            throw new FileNotFoundException("Nie odnaleziono pliku " + fileName);
+        }
+    }
+
+    public static Krawedz readFromFile(BufferedReader reader, Wierzcholek[] listaWierzcholkow) throws IOException {
+        try {
+            String line = reader.readLine();
+            if (line.equals("$"))return null;
+            String[] txt = line.split("#");
+
+            Wierzcholek poczatek = null, koniec = null;
+            for (Wierzcholek wierzcholek : listaWierzcholkow)
+            {
+                if (wierzcholek.getX()==Integer.parseInt(txt[0]) && wierzcholek.getY() == Integer.parseInt(txt[1]))
+                    poczatek = wierzcholek;
+                if (wierzcholek.getX()==Integer.parseInt(txt[2]) && wierzcholek.getY() == Integer.parseInt(txt[3]))
+                    koniec = wierzcholek;
+            }
+            Krawedz krawedz = new Krawedz(poczatek, koniec, Integer.parseInt(txt[4]), new Color(Integer.parseInt(txt[5])));
+            return krawedz;
+        }catch (IOException e)
+        {
+            throw new IOException("Podczas odczytu danych z twojego pliku wystąpił błąd!");
+        }
+    }
+
+    public static Krawedz readFromFile(String fileName, Wierzcholek[] listaWierzcholkow) throws IOException, FileNotFoundException {
+        try (BufferedReader reader = new BufferedReader(new FileReader(new File(fileName)))){
+            return Krawedz.readFromFile(reader, listaWierzcholkow);
+        }catch (FileNotFoundException e)
+        {
+            throw new FileNotFoundException("Nie znalezniono pliku o nazwie: " + fileName);
+        }catch (IOException e)
+        {
+            throw new IOException("Podczas odczytu danych z twojego pliku wystąpił błąd!");
+        }
+
+    }
+
 }
